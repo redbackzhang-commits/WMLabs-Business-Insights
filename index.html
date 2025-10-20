@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商业思维与信息化经营分析报告</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/panzoom/9.4.3/panzoom.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1800px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        .graph-container {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #764ba2;
+            font-size: 1.8em;
+            margin: 30px 0 15px 0;
+            font-weight: 600;
+        }
+        
+        h3 {
+            color: #5a67d8;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+            font-weight: 600;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .highlight-term {
+            background: linear-gradient(120deg, #ffd89b 0%, #19547b 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px dotted #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .highlight-term:hover {
+            transform: translateY(-2px);
+            border-bottom-color: #764ba2;
+        }
+        
+        .concept-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .concept-list li {
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+        
+        .concept-list li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .sidebar-content {
+            display: none;
+        }
+        
+        .sidebar-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .default-message {
+            color: #95a5a6;
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .related-concepts {
+            margin-top: 20px;
+        }
+        
+        .related-link {
+            display: inline-block;
+            margin: 5px;
+            padding: 6px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        
+        .related-link:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+        
+        #graph {
+            width: 100%;
+            min-height: 700px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background: white;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .example-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        
+        .definition-box {
+            background: #fff4e6;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                max-height: none;
+            }
+        }
+        
+        .task-list {
+            background: linear-gradient(135deg, #e0f7fa 0%, #e1bee7 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .task-list li {
+            margin: 10px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .task-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <h1>商业思维与信息化经营分析报告</h1>
+            <div class="role-badge">文本和概念分析专家</div>
+            
+            <h2>核心任务</h2>
+            <ul class="task-list">
+                <li>深度解析现代商业环境中的<span class="highlight-term" data-concept="产品信息化">产品信息化</span>核心理念与实践路径</li>
+                <li>揭示<span class="highlight-term" data-concept="内卷本质">内卷本质</span>与<span class="highlight-term" data-concept="低水平竞争">低水平竞争</span>的破局之道</li>
+            </ul>
+            
+            <h2>核心论点分析</h2>
+            <p>本文由一位资深商业实践者分享，立场鲜明、语气直率，传递了强烈的紧迫感与批判性思维。核心主张可归纳为：</p>
+            
+            <h3>1. 颠覆性观点：产品质量与销售结果的脱钩</h3>
+            <div class="definition-box">
+                <strong>核心命题：</strong>"你的货的品质好不好，和他能不能卖得出去没有半毛钱的关系。"
+            </div>
+            <p>这一论断挑战了传统商业思维中"酒香不怕巷子深"的理念。作者区分了产品质量的两个作用维度：</p>
+            <ul>
+                <li><strong>对销售的影响：</strong>几乎为零，质量好坏不决定是否能卖出去</li>
+                <li><strong>对复购的影响：</strong>质量好带来<span class="highlight-term" data-concept="复购">复购</span>，质量差导致退货，质量极好产生<span class="highlight-term" data-concept="转介绍">转介绍</span></li>
+            </ul>
+            
+            <h3>2. 时代特征：从实物经济到信息经济</h3>
+            <div class="example-box">
+                <strong>关键洞察：</strong>"这个时代卖一切都是卖信息。"
+            </div>
+            <p>作者通过渠道演进史诠释了这一转变：</p>
+            <ul>
+                <li><strong>线下时代：</strong>成交装在实体店里</li>
+                <li><strong>电商时代：</strong>成交装在产品详情页里</li>
+                <li><strong>微商时代：</strong>成交装在对话框里</li>
+                <li><strong>短视频时代：</strong>成交装在短视频里</li>
+                <li><strong>直播时代：</strong>成交装在直播间里</li>
+            </ul>
+            <p>本质未变的是<span class="highlight-term" data-concept="成交逻辑">成交逻辑</span>，变化的仅是<span class="highlight-term" data-concept="信息承载渠道">信息承载渠道</span>。</p>
+            
+            <h3>3. 战略路径：产品信息化四步法</h3>
+            <p>作者提出了明确的操作路径，即<span class="highlight-term" data-concept="产品信息化">产品信息化</span>的实现方式：</p>
+            <ol>
+                <li><strong>图片化：</strong>将产品转化为视觉信息</li>
+                <li><strong>文字化：</strong>用文字描述产品价值</li>
+                <li><strong>短视频化：</strong>通过动态内容展示产品</li>
+                <li><strong>直播化：</strong>实时互动式呈现产品</li>
+            </ol>
+            <p>最终目标是"让这些信息被看见"。</p>
+            
+            <h3>4. 破局思维：内卷的诊断与治疗</h3>
+            <div class="definition-box">
+                <strong>内卷定义：</strong><span class="highlight-term" data-concept="内卷本质">内卷的本质是低水平竞争</span>。竞争本身无罪，问题在于参与者的水平过低。
+            </div>
+            <p>作者给出的解决方案聚焦于两个维度：</p>
+            <ul>
+                <li><strong>寻找<span class="highlight-term" data-concept="新渠道">新渠道</span>：</strong>不断发现能够触达用户的新平台与新场景</li>
+                <li><strong>应用<span class="highlight-term" data-concept="新工具">新工具</span>：</strong>学习并掌握新兴技术工具（如短视频编辑、直播运营等）</li>
+            </ul>
+            <p>强调"世界变了，但是你没跟得上"，核心问题不是能力或学历，而是"懒"——懒得动脑子、懒得学习。</p>
+            
+            <h3>5. 成交模型：信任经营的三阶段路径</h3>
+            <p>作者揭示了现代商业的核心竞争要素并非商品本身，而是<span class="highlight-term" data-concept="信任">信任</span>。成交的三个前提为：</p>
+            <ul>
+                <li><span class="highlight-term" data-concept="需求">需求</span>（客观存在）</li>
+                <li><span class="highlight-term" data-concept="信任">信任</span>（可经营）</li>
+                <li><span class="highlight-term" data-concept="购买力">购买力</span>（客观存在）</li>
+            </ul>
+            <p>其中，信任是唯一可经营的变量，其经营路径为：</p>
+            <div class="example-box">
+                <strong>信任经营三步：</strong>
+                <ol>
+                    <li><span class="highlight-term" data-concept="被看见">被看见</span>：让目标用户接触到你的信息</li>
+                    <li><span class="highlight-term" data-concept="被认可">被认可</span>：获得用户的认同与点头</li>
+                    <li><span class="highlight-term" data-concept="被需要">被需要</span>：成为用户的首选方案（甚至被依赖）</li>
+                </ol>
+            </div>
+            
+            <h3>6. 实战方法：对标学习法</h3>
+            <p>作者反对"创新至上"的迷思，强调<span class="highlight-term" data-concept="对标学习">对标学习</span>的重要性：</p>
+            <div class="example-box">
+                <strong>核心方法：</strong>"一个不会抄作业的学生是个傻学生、笨学生、蠢学生，自以为是的学生。"
+            </div>
+            <p>具体操作：</p>
+            <ul>
+                <li>找到与自己同行业、同赛道但更成功的对标对象</li>
+                <li>研究对方如何实现"被看见、被认可、被需要"</li>
+                <li>一比一照抄、模仿对方的成功路径</li>
+            </ul>
+            
+            <h2>情绪与立场</h2>
+            <p>文本呈现出强烈的<strong>批判性</strong>与<strong>激励性</strong>，夹杂着对传统思维的否定和对新思维的推崇。语言风格直白、口语化，充满情绪宣泄（如"放屁""老子""傻傻的努力"），营造出一种"醍醐灌顶"的教学场景。</p>
+            
+            <h2>关键实体与术语</h2>
+            <ul>
+                <li><span class="highlight-term" data-concept="产品信息化">产品信息化</span>：将产品转化为图文、短视频、直播等信息形式</li>
+                <li><span class="highlight-term" data-concept="内卷本质">内卷本质</span>：低水平竞争，而非竞争本身</li>
+                <li><span class="highlight-term" data-concept="新渠道">新渠道</span>：承载信息的新平台（短视频、直播等）</li>
+                <li><span class="highlight-term" data-concept="新工具">新工具</span>：实现信息化的技术手段</li>
+                <li><span class="highlight-term" data-concept="信任经营">信任经营</span>：通过被看见、被认可、被需要建立信任</li>
+                <li><span class="highlight-term" data-concept="对标学习">对标学习</span>：模仿成功同行的方法</li>
+            </ul>
+            
+            <h2>输出要求</h2>
+            <ul class="task-list">
+                <li><strong>响应式设计：</strong>页面在不同设备上自适应布局，保证阅读体验</li>
+                <li><strong>数学公式支持：</strong>使用 MathJax 渲染复杂表达式（示例：\( E = mc^2 \)，成功率 = \(\frac{\text{被看见} \times \text{被认可} \times \text{被需要}}{\text{市场竞争强度}}\)）</li>
+            </ul>
+            
+            <h2>生成指南</h2>
+            <div class="example-box">
+                <h3>代码示例：产品信息化流程伪代码</h3>
+                <pre><code class="language-python">
+# 产品信息化转换流程
+class ProductInformationizer:
+    def __init__(self, product):
+        self.product = product
+        self.channels = []
+    
+    def visualize(self):
+        """图片化：生成产品视觉素材"""
+        return self.product.generate_images()
+    
+    def textualize(self):
+        """文字化：撰写产品文案"""
+        return self.product.write_descriptions()
+    
+    def videoize(self):
+        """短视频化：制作动态展示"""
+        return self.product.create_short_videos()
+    
+    def livestream(self):
+        """直播化：实时互动展示"""
+        return self.product.start_livestream()
+    
+    def distribute(self, channel):
+        """分发到新渠道"""
+        self.channels.append(channel)
+        channel.publish(self.product)
+    
+    def build_trust(self, audience):
+        """信任经营三步走"""
+        step1 = self.be_seen(audience)  # 被看见
+        step2 = self.be_recognized(audience)  # 被认可
+        step3 = self.be_needed(audience)  # 被需要
+        return step1 and step2 and step3
+</code></pre>
+            </div>
+            
+            <div class="example-box">
+                <h3>创造性表达：商业演进公式</h3>
+                <p>我们可以用一个简化的数学模型来表达作者的核心观点：</p>
+                <p>$$\text{销售成功率} = f(\text{信息化程度}) \times g(\text{渠道适配度}) \times h(\text{工具应用水平})$$</p>
+                <p>其中产品质量 \(Q\) 对销售成功率的直接影响系数趋近于零（在首次购买场景），但对复购率 \(R\) 有强相关性：</p>
+                <p>$$R = k \cdot Q + \text{constant}$$</p>
+                <p>信任度 \(T\) 的累积模型：</p>
+                <p>$$T(t) = \int_0^t [\alpha \cdot \text{Visibility}(s) + \beta \cdot \text{Recognition}(s) + \gamma \cdot \text{Need}(s)] \, ds$$</p>
+                <p>其中 \(\alpha, \beta, \gamma\) 为各阶段的权重系数。</p>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <h2>概念详解</h2>
+            <div class="default-message">
+                <p>👈 点击左侧高亮术语或下方图谱节点查看详细解释</p>
+            </div>
+            <div id="sidebar-content"></div>
+        </div>
+        
+        <div class="graph-container">
+            <h2>商业思维概念关系图谱</h2>
+            <div class="controls">
+                <button class="btn" onclick="changeLayout('LR')">横向布局 (LR)</button>
+                <button class="btn" onclick="changeLayout('TB')">纵向布局 (TB)</button>
+                <button class="btn" onclick="toggleFullscreen()">全屏显示</button>
+                <button class="btn" onclick="downloadGraph()">下载图谱 (PNG)</button>
+                <button class="btn" onclick="resetZoom()">重置视图</button>
+            </div>
+            <div id="graph"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 概念数据库
+        const notes = {
+            "产品信息化": {
+                definition: "将实体产品或服务转化为可传播的信息形式，包括图片、文字、短视频、直播等多种媒介形态。",
+                example: "一家茶叶店不再仅仅卖茶叶本身，而是通过拍摄茶园风光、制茶工艺、品茶场景的短视频来传递产品价值，这就是产品信息化的过程。",
+                related: ["新渠道", "新工具", "被看见", "信息承载渠道"]
+            },
+            "内卷本质": {
+                definition: "内卷的本质是低水平竞争，即参与者在相同的低层次维度上进行重复性、无效率的竞争，而非竞争行为本身的问题。",
+                example: "十家餐厅都在同一条街上用同样的菜单、同样的价格竞争，而不去思考如何差异化经营、如何用短视频引流，这就是低水平竞争。",
+                related: ["低水平竞争", "新渠道", "新工具"]
+            },
+            "低水平竞争": {
+                definition: "在认知、技术、渠道等维度上落后于时代，导致只能在传统领域与他人进行同质化竞争，无法形成差异化优势。",
+                example: "只知道降价促销、延长营业时间，而不学习使用短视频、直播等新工具进行品牌传播，就是陷入低水平竞争。",
+                related: ["内卷本质", "新渠道", "新工具"]
+            },
+            "新渠道": {
+                definition: "承载信息、触达用户的新兴平台与场景，随着技术发展不断演进，从实体店到电商、微商、短视频、直播等。",
+                example: "从在街边开实体店，到在淘宝开网店，再到在抖音做短视频带货，每一次都是新渠道的应用。",
+                related: ["产品信息化", "新工具", "信息承载渠道"]
+            },
+            "新工具": {
+                definition: "实现产品信息化、触达新渠道所需的技术手段和平台工具，如视频编辑软件、直播设备、社交媒体运营工具等。",
+                example: "学会使用剪映制作短视频、学会使用OBS进行直播推流、学会使用数据分析工具优化投放策略。",
+                related: ["产品信息化", "新渠道"]
+            },
+            "信任": {
+                definition: "用户对商家、产品、服务的心理认同与安全感，是促成交易的核心可经营要素，决定了用户是否愿意购买。",
+                example: "你第一次在某个直播间买东西，是因为主播多次出现在你的视野中（被看见），她的讲解让你觉得专业（被认可），你正好需要这个产品（被需要），最终产生了信任。",
+                related: ["被看见", "被认可", "被需要", "信任经营"]
+            },
+            "被看见": {
+                definition: "让目标用户接触到你的产品、服务或个人品牌信息的第一步，是建立信任的起点。",
+                example: "通过持续发布短视频、在搜索结果中获得排名、被推荐到用户的信息流中，都是实现'被看见'的方式。",
+                related: ["信任", "产品信息化", "新渠道"]
+            },
+            "被认可": {
+                definition: "用户对你传递的信息表示认同、点头，认为你的观点正确、产品有价值，是信任建立的第二阶段。",
+                example: "用户看完你的短视频后评论'说得太对了'、'学到了'，或者在直播间点赞、转发，就是被认可的表现。",
+                related: ["信任", "被看见", "被需要"]
+            },
+            "被需要": {
+                definition: "用户认为你的产品或服务能够解决他的问题、满足他的需求，甚至离不开你，是信任经营的最高境界。",
+                example: "用户每次遇到某类问题都会第一时间想到你，主动来找你咨询或购买，甚至推荐给朋友，就是被需要的状态。",
+                related: ["信任", "被认可", "转介绍"]
+            },
+            "需求": {
+                definition: "用户对某种产品或服务的内在渴望，是成交的三大前提之一，属于客观存在的因素。",
+                example: "天气变冷，人们需要保暖衣物；孩子要上学，家长需要教育服务。需求是客观的，但可以被激发和引导。",
+                related: ["信任", "购买力", "成交逻辑"]
+            },
+            "购买力": {
+                definition: "用户的经济能力与支付意愿，是成交的三大前提之一，属于客观存在的因素。",
+                example: "无论你的产品多好、信任多强，如果用户没有相应的经济能力，也无法完成购买。",
+                related: ["需求", "信任", "成交逻辑"]
+            },
+            "复购": {
+                definition: "用户在首次购买后，基于良好的产品体验或服务感受，再次购买同一商家的产品或服务。",
+                example: "顾客第一次在你的餐厅用餐体验很好，一个月后又带朋友来了，这就是复购行为。",
+                related: ["转介绍", "信任", "被需要"]
+            },
+            "转介绍": {
+                definition: "用户因为对产品或服务极度满意，主动向身边的人推荐，为商家带来新客户的行为。",
+                example: "你的产品质量超出预期，客户主动在朋友圈晒单、给朋友推荐，这就是转介绍的力量。",
+                related: ["复购", "被需要", "信任"]
+            },
+"成交逻辑": {
+definition: "促成交易的底层规律与核心要素，包括需求、信任、购买力三个维度，以及被看见、被认可、被需要的路径。",
+example: "无论是线下开店还是线上直播，成交的本质逻辑从未改变：用户有需求、信任你、有购买能力，就会买单。",
+related: ["需求", "信任", "购买力", "被看见", "被认可", "被需要"]
+},
+"信息承载渠道": {
+definition: "承载商业信息、连接商家与用户的媒介平台，随着技术演进从实体店演变为电商、微商、短视频、直播等形态。",
+example: "90年代的商业信息主要通过实体店和广告传播，2010年代通过电商详情页，2020年代则主要通过短视频和直播间。",
+related: ["新渠道", "产品信息化"]
+},
+"对标学习": {
+definition: "找到与自己同行业、同赛道但更成功的对象，研究并模仿其成功方法，而非自己从零摸索创新。",
+example: "发现同城一家同类型餐厅通过短视频引流效果很好，就去研究他的视频类型、发布频率、文案风格，然后在自己的账号上复制这套方法。",
+related: ["被看见", "被认可", "被需要"]
+},
+"信任经营": {
+definition: "通过系统性的策略与行动，逐步建立、维护和深化用户对品牌的信任关系，是现代商业的核心竞争力。",
+example: "持续输出有价值的内容让用户看见你，用专业知识让用户认可你，用优质服务让用户需要你，最终形成长期信任关系。",
+related: ["信任", "被看见", "被认可", "被需要"]
+}
+};
+// 当前布局
+    let currentLayout = 'LR';
+    let panzoomInstance = null;
+    
+    // 生成 Graphviz DOT 代码
+    function generateDOT(layout) {
+        return `
+            digraph BusinessConcepts {
+                rankdir=${layout};
+                node [shape=box, style="rounded,filled", fontname="Microsoft YaHei", fontsize=12];
+                edge [fontname="Microsoft YaHei", fontsize=10];
+                
+                // 核心概念节点
+                "产品信息化" [fillcolor="#FFE4B5", color="#FF8C00", penwidth=2];
+                "内卷本质" [fillcolor="#FFB6C1", color="#DC143C", penwidth=2];
+                "信任经营" [fillcolor="#B0E0E6", color="#4682B4", penwidth=2];
+                
+                // 问题诊断节点
+                "低水平竞争" [fillcolor="#FFA07A", color="#FF4500"];
+                
+                // 解决方案节点
+                "新渠道" [fillcolor="#98FB98", color="#228B22"];
+                "新工具" [fillcolor="#98FB98", color="#228B22"];
+                "对标学习" [fillcolor="#98FB98", color="#228B22"];
+                
+                // 信息化实现节点
+                "图片化" [fillcolor="#F0E68C", color="#DAA520"];
+                "文字化" [fillcolor="#F0E68C", color="#DAA520"];
+                "短视频化" [fillcolor="#F0E68C", color="#DAA520"];
+                "直播化" [fillcolor="#F0E68C", color="#DAA520"];
+                
+                // 信任路径节点
+                "被看见" [fillcolor="#DDA0DD", color="#9370DB"];
+                "被认可" [fillcolor="#DDA0DD", color="#9370DB"];
+                "被需要" [fillcolor="#DDA0DD", color="#9370DB"];
+                
+                // 成交要素节点
+                "需求" [fillcolor="#ADD8E6", color="#4169E1"];
+                "信任" [fillcolor="#ADD8E6", color="#4169E1"];
+                "购买力" [fillcolor="#ADD8E6", color="#4169E1"];
+                
+                // 结果节点
+                "复购" [fillcolor="#90EE90", color="#32CD32"];
+                "转介绍" [fillcolor="#90EE90", color="#32CD32"];
+                
+                // 渠道演进节点
+                "信息承载渠道" [fillcolor="#F5DEB3", color="#D2691E"];
+                
+                // 成交节点
+                "成交逻辑" [fillcolor="#87CEEB", color="#1E90FF", penwidth=2];
+                
+                // 关系定义
+                "内卷本质" -> "低水平竞争" [label="本质是", color="#DC143C"];
+                "低水平竞争" -> "新渠道" [label="破解靠", color="#FF4500"];
+                "低水平竞争" -> "新工具" [label="破解靠", color="#FF4500"];
+                
+                "产品信息化" -> "图片化" [label="包含", color="#FF8C00"];
+                "产品信息化" -> "文字化" [label="包含", color="#FF8C00"];
+                "产品信息化" -> "短视频化" [label="包含", color="#FF8C00"];
+                "产品信息化" -> "直播化" [label="包含", color="#FF8C00"];
+                
+                "图片化" -> "新渠道" [label="依赖", color="#DAA520"];
+                "文字化" -> "新渠道" [label="依赖", color="#DAA520"];
+                "短视频化" -> "新渠道" [label="依赖", color="#DAA520"];
+                "直播化" -> "新渠道" [label="依赖", color="#DAA520"];
+                
+                "新渠道" -> "信息承载渠道" [label="体现为", color="#228B22"];
+                "新工具" -> "产品信息化" [label="实现", color="#228B22"];
+                
+                "信任经营" -> "被看见" [label="第一步", color="#4682B4"];
+                "被看见" -> "被认可" [label="引向", color="#9370DB"];
+                "被认可" -> "被需要" [label="升级为", color="#9370DB"];
+                
+                "产品信息化" -> "被看见" [label="促成", color="#FF8C00"];
+                "对标学习" -> "被看见" [label="指导", color="#228B22"];
+                "对标学习" -> "被认可" [label="指导", color="#228B22"];
+                "对标学习" -> "被需要" [label="指导", color="#228B22"];
+                
+                "需求" -> "成交逻辑" [label="前提1", color="#4169E1"];
+                "信任" -> "成交逻辑" [label="前提2", color="#4169E1"];
+                "购买力" -> "成交逻辑" [label="前提3", color="#4169E1"];
+                
+                "被看见" -> "信任" [label="建立", color="#9370DB"];
+                "被认可" -> "信任" [label="增强", color="#9370DB"];
+                "被需要" -> "信任" [label="深化", color="#9370DB"];
+                
+                "成交逻辑" -> "复购" [label="质量好导致", color="#1E90FF"];
+                "复购" -> "转介绍" [label="极好时产生", color="#32CD32"];
+                "被需要" -> "转介绍" [label="促进", color="#9370DB"];
+            }
+        `;
+    }
+    
+    // 渲染图谱
+    function renderGraph(layout) {
+        const viz = new Viz();
+        const dotString = generateDOT(layout);
+        
+        viz.renderSVGElement(dotString)
+            .then(element => {
+                const graphDiv = document.getElementById('graph');
+                graphDiv.innerHTML = '';
+                graphDiv.appendChild(element);
+                
+                // 添加点击事件
+                const nodes = element.querySelectorAll('g.node');
+                nodes.forEach(node => {
+                    const title = node.querySelector('title');
+                    if (title && notes[title.textContent]) {
+                        node.style.cursor = 'pointer';
+                        node.addEventListener('click', () => {
+                            showConcept(title.textContent);
+                        });
+                    }
+                });
+                
+                // 边标签点击事件
+                const edges = element.querySelectorAll('g.edge');
+                edges.forEach(edge => {
+                    const title = edge.querySelector('title');
+                    const textElement = edge.querySelector('text');
+                    if (textElement) {
+                        textElement.style.cursor = 'pointer';
+                        textElement.addEventListener('click', () => {
+                            const edgeLabel = textElement.textContent;
+                            showEdgeInfo(title.textContent, edgeLabel);
+                        });
+                    }
+                });
+                
+                // 初始化 Panzoom
+                if (panzoomInstance) {
+                    panzoomInstance.destroy();
+                }
+                panzoomInstance = Panzoom(element, {
+                    maxScale: 3,
+                    minScale: 0.5,
+                    contain: 'outside'
+                });
+                
+                // 鼠标滚轮缩放
+                graphDiv.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+            })
+            .catch(error => {
+                console.error('Graph rendering error:', error);
+            });
+    }
+    
+    // 显示概念详情
+    function showConcept(conceptName) {
+        const concept = notes[conceptName];
+        if (!concept) return;
+        
+        const sidebarContent = document.getElementById('sidebar-content');
+        const defaultMessage = document.querySelector('.default-message');
+        
+        if (defaultMessage) defaultMessage.style.display = 'none';
+        
+        let relatedLinks = '';
+        if (concept.related && concept.related.length > 0) {
+            relatedLinks = '<div class="related-concepts"><h4>相关概念</h4>';
+            concept.related.forEach(rel => {
+                relatedLinks += `<a href="#" class="related-link" onclick="showConcept('${rel}'); return false;">${rel}</a>`;
+            });
+            relatedLinks += '</div>';
+        }
+        
+        sidebarContent.innerHTML = `
+            <div class="sidebar-content active">
+                <h3>${conceptName}</h3>
+                <div class="definition-box">
+                    <h4>定义</h4>
+                    <p>${concept.definition}</p>
+                </div>
+                <div class="example-box">
+                    <h4>示例</h4>
+                    <p>${concept.example}</p>
+                </div>
+                ${relatedLinks}
+            </div>
+        `;
+        
+        // 滚动到侧栏顶部
+        document.querySelector('.sidebar').scrollTop = 0;
+    }
+    
+    // 显示边信息
+    function showEdgeInfo(edgeTitle, label) {
+        const [source, target] = edgeTitle.split('->').map(s => s.trim());
+        const sidebarContent = document.getElementById('sidebar-content');
+        const defaultMessage = document.querySelector('.default-message');
+        
+        if (defaultMessage) defaultMessage.style.display = 'none';
+        
+        sidebarContent.innerHTML = `
+            <div class="sidebar-content active">
+                <h3>关系：${label}</h3>
+                <div class="definition-box">
+                    <h4>起点概念</h4>
+                    <p><a href="#" class="related-link" onclick="showConcept('${source}'); return false;">${source}</a></p>
+                </div>
+                <div class="example-box">
+                    <h4>终点概念</h4>
+                    <p><a href="#" class="related-link" onclick="showConcept('${target}'); return false;">${target}</a></p>
+                </div>
+                <div class="definition-box">
+                    <h4>关系类型</h4>
+                    <p>${label}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 切换布局
+    function changeLayout(layout) {
+        currentLayout = layout;
+        renderGraph(layout);
+    }
+    
+    // 重置缩放
+    function resetZoom() {
+        if (panzoomInstance) {
+            panzoomInstance.reset();
+        }
+    }
+    
+    // 全屏切换
+    function toggleFullscreen() {
+        const graphContainer = document.querySelector('.graph-container');
+        if (!document.fullscreenElement) {
+            graphContainer.requestFullscreen().catch(err => {
+                console.error('Fullscreen error:', err);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+    
+    // 下载图谱
+    function downloadGraph() {
+        const svg = document.querySelector('#graph svg');
+        if (!svg) return;
+        
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svg);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'business-concepts-graph.png';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        };
+        
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
+    }
+    
+    // 高亮术语点击事件
+    document.addEventListener('DOMContentLoaded', () => {
+        renderGraph(currentLayout);
+        
+        const highlightTerms = document.querySelectorAll('.highlight-term');
+        highlightTerms.forEach(term => {
+            term.addEventListener('click', () => {
+                const conceptName = term.getAttribute('data-concept');
+                showConcept(conceptName);
+            });
+        });
+    });
+    
+    // 配置 MathJax
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+            fontCache: 'global'
+        }
+    };
+</script>
+</body>
+</html>
+```
